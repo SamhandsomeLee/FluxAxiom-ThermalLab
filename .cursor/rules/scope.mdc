@@ -1,0 +1,16 @@
+---
+description: ThermalLab 当前阶段与明确不做的事（阶段切换时由用户更新）
+alwaysApply: true
+---
+
+# 当前阶段
+
+ThermalLab 是跨平台红外热像 SDK 与 Qt/QML 客户端。架构看 `docs/architecture/` 的设计文档 V2.0，执行看 `docs/development/ThermalLab 执行方案 v1.0.md`。
+
+当前只做 **G0：基线与骨架**（2026-10-26 至 11-01）。
+
+可以做：CMake + vcpkg 工作区、最小 SDK 目标与测试、Windows/Linux CI、Jetson 交叉编译镜像与 hello、环境与许可证清单、`baseline.yaml` 骨架、ADR-001/002/004/013/014。
+
+不要提前做：Y16 回放与温度换算（G1）、Qt 客户端、FFmpeg、OpenCL、推理插件、ThermalService、MySQL、Web/Android、ESP32 固件、Agent 适配层，以及没有使用点的空目录、空库、空接口。
+
+出现新的跨模块边界时写 ADR，不要把决策只留在对话里。

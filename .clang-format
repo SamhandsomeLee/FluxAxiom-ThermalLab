@@ -1,0 +1,10 @@
+# 只约束排版。Windows 编译器是 MSYS2 MinGW GCC。
+# Standard 与设计文档里的 C++17 写法一致；是否最终采用仍由 G0.2 确认。
+BasedOnStyle: LLVM
+ColumnLimit: 100
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+ContinuationIndentWidth: 4
+Standard: c++17

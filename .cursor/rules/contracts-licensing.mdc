@@ -1,0 +1,35 @@
+---
+description: 修改契约、数据库迁移、依赖清单或部署文件时的版本与许可证约定
+globs: contracts/**,migrations/**,vcpkg.json,docs/third-party-licenses.md,deploy/**,assets/samples/**
+alwaysApply: false
+---
+
+# 契约与许可证
+
+## 契约
+
+- `contracts/` 下每个文件顶部写版本、状态（Draft / Frozen）和变更记录。
+- Frozen 之后只允许向后兼容的追加；不兼容的改动另起新版本（`device-protocol-v2.md`、`/v2`）并写 ADR。
+- 改契约的那一轮同时更新：契约测试、受影响端的生成代码或适配层、变更记录。
+- OpenAPI 是 Web、Android、服务端测试的共同数据模型，TS / Kotlin 客户端由生成器产出，不手改。
+- 设备协议的编解码只实现一份（纯 C），固件与 `device-sim` 共用。
+
+## 数据库迁移
+
+- 迁移按序号命名，已发布的不修改。数据库只存元数据和内容引用；视频、Y16、模型、截图存文件系统（内容哈希 + manifest）。测温记录按 1 Hz 汇总写入。
+
+## 样本
+
+- Golden 样本登记在 `assets/samples/manifest.yaml`：文件、SHA256、来源、许可证、分辨率、帧数、预期结果。合成样本由仓库内脚本以固定种子生成，可复现。期望值改变要在提交正文说明原因。
+
+## 许可证
+
+| 允许 | 条件 |
+| --- | --- |
+| MIT / BSD / Apache-2.0 / Zlib / BSL-1.0 | 直接使用 |
+| LGPL（Qt、FFmpeg LGPL 配置、MariaDB Connector/C） | 只动态链接 |
+| NVIDIA 专有（TensorRT、CUDA） | 不入仓库、不随包分发，依赖 JetPack |
+| GPL / AGPL | 不使用 |
+
+- 新增依赖、模型、数据集，同一轮更新 `docs/third-party-licenses.md`（名称、版本、许可证、链接方式、来源 URL、核对日期）。
+- 参考开源实现时只参考协议与数据布局；复制代码前核对许可证并在文件头注明来源。

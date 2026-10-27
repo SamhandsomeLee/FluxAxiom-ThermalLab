@@ -1,0 +1,31 @@
+---
+description: 修改 SDK、C ABI、插件 ABI 或 C/Python 示例时的语义与提交前检查
+globs: sdk/**,examples/**,tests/**,benchmarks/**
+alwaysApply: false
+---
+
+# SDK 运行语义
+
+改这些路径时以设计文档 §5.2、§5.3 与 ADR-004 为准，不要在这里重写架构。
+
+- 公共头文件只在 `sdk/include/thermallab/`，`extern "C"`，导出宏 `TL_API`，前缀 `tl_` / `TL_`。只用固定宽度整数、`float`/`double`、指针和 UTF-8 `const char*`。结构体字段不用 C `enum` 类型，用 `int32_t` 存。
+- 句柄不透明，`create` / `destroy` 成对，`destroy(NULL)` 安全。可扩展结构体前两个字段是 `uint32_t size`、`uint32_t version`，新字段只追加在末尾。
+- 返回 `tl_status`，`TL_OK == 0`。错误码一旦发布不改值、不复用。每个导出函数用 `try/catch` 包住，异常转成错误码。
+- 插件入口只有 `tl_get_backend_plugin(uint32_t host_abi)`；宿主先查 `size` 与 `abi_version`，不兼容返回 `TL_ERR_UNSUPPORTED_BACKEND` 并写原因；插件 Runtime 缺失时宿主不崩溃。
+- 内部 C++17：RAII、`std::unique_ptr`，有真实共享所有权才用 `std::shared_ptr`，不写裸 `new`/`delete`。命名空间 `tl::`。
+- 二进制数据显式按小端解析；文件里的尺寸视为不可信输入，`size_t` 计算并检查溢出。变量名带单位（`temp_c`、`pts_ns`、`dist_m`）。
+- 时间基于 `pts_ns`，不基于墙钟。测温、报警、AI 输入基于 Y16 或温度矩阵；NUC 帧按 ADR-006 处理。
+- 测试用 CTest `LABELS`：`unit`、`golden` 在 CI 必跑；`hardware`、`jetson`、`slow` 默认排除。未标注的测试不能依赖硬件或网络。
+
+提交前跑（G0 落地预设之后生效）：
+
+```bash
+cmake --preset linux-debug && cmake --build --preset linux-debug && ctest --preset linux-debug -L "unit|golden"
+cmake --preset linux-asan  && cmake --build --preset linux-asan  && ctest --preset linux-asan  -L "unit|golden"
+```
+
+```powershell
+cmake --preset windows-gcc-debug; cmake --build --preset windows-gcc-debug; ctest --preset windows-gcc-debug -L "unit|golden"
+```
+
+默认测试使用回放样本与模拟设备，不连接相机、ESP32 或网络。

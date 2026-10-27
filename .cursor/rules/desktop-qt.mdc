@@ -1,0 +1,17 @@
+---
+description: 修改 Qt 6 / QML 桌面客户端时的分层、线程与渲染约定（G2 起）
+globs: apps/desktop-qt/**,experiments/opengl-native/**
+alwaysApply: false
+---
+
+# 桌面客户端
+
+以设计文档 §2.1、§4.4、§6.4 与 ADR-005 为准。
+
+- QML 只做展示与交互。状态在 C++ ViewModel（`Q_PROPERTY` + `NOTIFY`、`QAbstractListModel`）。
+- ViewModel 只经 `ThermalClient` 门面访问 SDK 或服务：G2–G3 用 `InProcClient`，G4 起用 `RemoteClient`。切换实现时 QML 与 ViewModel 不改。
+- QML 与 ViewModel 不 include SDK 内部头文件，不做温度换算、报警判定、NMS。
+- GUI 线程不做解码、推理、GPU 同步、文件或数据库 IO。工作线程到 GUI 线程用 queued connection。渲染线程的数据交接只在 `updatePaintNode` / `synchronize` 里，交接点写在注释和 `docs/architecture/threading.md`。
+- 热像显示用自定义 `QSGMaterialShader`（或 `QQuickRhiItem`），GLSL 440，经 `qt_add_shaders` 编译。不假设图形后端是 OpenGL；原生 GL 代码只在 `experiments/opengl-native/` 或强制 OpenGL 的实验开关后面。
+- 不用 Qt Charts / Qt Graphs，图表用 QML `Canvas` 或 `Shape` 自绘。只动态链接 Qt。
+- 着色器输出与 CPU 参考实现做像素比对，差值 ≤ 1 LSB。

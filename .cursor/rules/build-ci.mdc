@@ -1,0 +1,18 @@
+---
+description: 修改 CMake、vcpkg、CI 工作流或交叉编译镜像时的约定
+globs: **/CMakeLists.txt,cmake/**,CMakePresets.json,vcpkg.json,.github/workflows/**,deploy/docker/**
+alwaysApply: false
+---
+
+# 构建与 CI
+
+以设计文档 §6.1、§6.2 与 ADR-013 为准。
+
+- 只用 `target_*` 命令，不用全局 `include_directories` / `add_definitions` / `link_libraries`。库目标提供 `thermallab::` 别名。
+- 统一用 `CMakePresets.json`：`linux-debug`、`linux-release`、`linux-asan`、`windows-gcc-debug`、`windows-gcc-release`、`jetson-cross-release`；需要时加 `linux-tsan`。每个配置预设有对应的 build / test 预设。文档和脚本里不写临时 `-D` 组合。Windows 使用 MSYS2 MinGW GCC，不设 MSVC 预设。
+- 警告即错误：GCC/Clang `-Wall -Wextra -Wpedantic -Werror`。
+- C++ 依赖走 `vcpkg.json` manifest 并锁 `builtin-baseline`，只加实际用到的。Qt 用官方安装器或 aqtinstall，不走 vcpkg。TensorRT / CUDA 不进仓库，找不到时插件跳过构建而不是报错。
+- SDK `install(EXPORT)` 生成 CMake config，外部项目能 `find_package(thermallab CONFIG REQUIRED)`。Linux / Jetson rpath 用 `$ORIGIN`。
+- 交叉编译工具链与 Jetson 的 glibc / GCC 主版本匹配，链接 sysroot 里的 glibc。sysroot 不入库。
+- CI 失败阻止合并。Jetson self-hosted runner 只响应 `main` 推送与手动触发，不对 fork 的 PR 运行。
+- 一条约束能写成 CI 检查的，写成检查，不要只留在规则文字里（见执行方案 §6）。

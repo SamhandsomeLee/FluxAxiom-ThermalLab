@@ -1,0 +1,9 @@
+# 文本统一为 LF，与 .editorconfig 一致。
+* text=auto eol=lf
+
+# 大体积样本与模型走 Git LFS。当前仓库还没有这些文件。
+*.y16 filter=lfs diff=lfs merge=lfs -text -eol
+*.onnx filter=lfs diff=lfs merge=lfs -text -eol
+*.engine filter=lfs diff=lfs merge=lfs -text -eol
+*.mp4 filter=lfs diff=lfs merge=lfs -text -eol
+*.mov filter=lfs diff=lfs merge=lfs -text -eol

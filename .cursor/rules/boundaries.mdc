@@ -1,0 +1,15 @@
+---
+description: 设备所有权、数据保真、依赖方向与许可证边界
+alwaysApply: true
+---
+
+# 基本边界
+
+- SDK、桌面、测温、录像、推理、Benchmark 不依赖 FluxAxiom 或任何 LLM。Agent 适配层只经版本化 HTTP API 访问 ThermalService。
+- 设备、帧缓存、GPU 上下文、推理执行只由 C++ 运行时拥有。同一设备同一时刻只有一个所有者：G1–G3 是桌面进程，G4 起是 ThermalService。
+- Y16 原始数据与温度矩阵贯穿管线。8-bit 伪彩只用于显示，不从它反推温度。温度换算、报警判定、前后处理只在 SDK 里实现一份，其它端只展示。
+- 帧走 `IFrameChannel` 或媒体流；控制、结果、告警、实验元数据走 API。高频帧不进数据库、不进 durable event、不进普通日志。
+- `ExperimentJob`（MySQL）和 `Run/Attempt`（FluxAxiom SQLite）只通过关联 ID 关联，`RunId` 不充当 `ExperimentId`。
+- 异常不跨越 C ABI。公共头文件能被 C99 编译器单独编译。
+- 不引入 GPL / AGPL 依赖（Ultralytics YOLO、x264、带 `--enable-gpl` 的 FFmpeg、Qt Charts / Qt Graphs）。新增依赖、模型、数据集，同一轮更新 `docs/third-party-licenses.md`。
+- 结果不明就标 `Unknown`、`Blocked` 或 `Not Verified`，不当成成功。性能数字必须附 `baseline_id`。

@@ -1,0 +1,15 @@
+# 本机构建目录。CMake 预设的二进制目录放在这里。
+build/
+out/
+
+# vcpkg manifest 模式的安装树，不入库。
+vcpkg_installed/
+
+# 本机覆盖预设，可含本机编译器路径。
+CMakeUserPresets.json
+
+# 编译数据库可由预设重新生成。
+compile_commands.json
+
+# Jetson sysroot 体积大，且含目标机系统文件。见 build-ci 规则。
+deploy/jetson/sysroot/
