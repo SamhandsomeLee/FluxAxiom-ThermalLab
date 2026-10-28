@@ -4,7 +4,7 @@
 > 依据：《FluxAxiom ThermalLab 产品需求与系统架构设计 V2.0》（下称“设计文档”）；FluxAxiom《P0 阶段执行方案 v1.1》的协作方式与 2026-10-27 的仓库状态
 > 性质：执行计划，**不是对设计文档 V2.0 的重新冻结**
 > 目标：2027-01-17 达到 M1 投递基线；2027-02-28 达到 M2（JD 全覆盖，v1.0）；2027-03-28 发布 v1.1（Agent 集成）
-> 状态：**G0 进行中；仓库尚无代码**
+> 状态：**G0 进行中；G0.1 已提交，G0.2 最小 SDK 在工作区**
 
 ## 0. 修订记录
 
@@ -18,6 +18,7 @@
 | NFR-02/05/06/08/09/14/15 挂到具体工作包的验收证据上 | §4、§5 |
 | Windows 本机与 CI 都用 MSYS2 MinGW GCC，不使用 MSVC；预设改为 `windows-gcc-*`。许可证 MIT。MFC-01 仍待 G4 决定 | §4.2、§4.2.1、§6 |
 | G0.1 文件约定：版权行 `Copyright (c) 2026 FluxAxiom ThermalLab`；clang-format 为 LLVM、列宽 100、缩进 4；LFS 跟踪 y16/onnx/engine/mp4/mov | §4.2.1 |
+| G0.2：C++17；Qt LTS 留到 G0.8；`tl_get_version` 返回静态 `0.0.1`；vcpkg baseline `15b12b99` | §4.2、§4.2.1 |
 
 <!-- 对齐中做出的落地选择，按「Gx.y 已确定的……」写进对应小节，并在本表加一行。 -->
 
@@ -121,7 +122,6 @@ FluxAxiom-ThermalLab/
 
 **待对齐**：
 
-- G0.2：Qt 不进 G0，但 Qt LTS 版本要不要现在锁定写进 ADR-013？C++ 标准定 17 是否已最终确认（Jetson 工具链与本机 GCC 15 都支持 20，但设计文档写的是 17）？
 - G0.4：sysroot 从 Jetson 用 rsync 拉取，还是解包 NVIDIA 发布的 L4T rootfs？Jetson 上的测试是跑交叉编译的二进制，还是在 Jetson 本机构建？
 - G0.7：MySQL 客户端库选 MariaDB Connector/C（LGPL）还是 MySQL Connector/C++（GPLv2 + FOSS Exception）？红外数据集是否允许公开发布衍生模型？检测模型选 YOLOX 还是 RT-DETR？
 
@@ -135,12 +135,22 @@ FluxAxiom-ThermalLab/
 - 设计文档 §5.2 仍写「Windows MSVC」。本方案这一轮改用 MinGW GCC。两者的 CRT 不同，不把 MinGW 编出的库当成 MSVC 程序可链接的证明。
 - 设计文档 MFC-01 仍要求「MSVC 独立编译」。MFC 不能用 MinGW 编译。G4.10 开工前再决定：为这一个示例单独使用 MSVC，或把 MFC-01 标为 `Blocked`。G0 不为此安装 MSVC。
 
-尚未决定，留在上面的待对齐里：C++ 标准是否维持 17、Qt LTS 是否现在锁进 ADR-013、vcpkg baseline、Jetson 型号与 JetPack 版本、sysroot 来源。
+尚未决定，留在上面的待对齐里：Jetson 型号与 JetPack 版本、sysroot 来源。
+
+G0.2 已确定（2026-10-28）：
+
+- C++ 标准是 17。GCC 15 能编译 20，这一阶段仍按设计文档 §6.1。
+- Qt LTS 不在 G0.2 锁定，留到 G0.8 的 ADR-013。这一阶段不写该 ADR。
+- `tl_get_version` 的签名是 `const char* tl_get_version(void)`，返回静态字符串 `0.0.1`，进程结束前一直有效。不引入 `tl_status`，错误码表仍属于 G1.2。
+- `cmake_minimum_required` 是 3.28。`linux-asan` 使用 `-fsanitize=address,undefined,leak` 和 `-fno-omit-frame-pointer`，只在 Linux 打开。
+- 动态库目标是 `thermallab_core`，别名 `thermallab::core`，输出名 `thermallab`。
+- vcpkg `builtin-baseline` 是 `15b12b99a227d51e21c86dffd40385439eac87a0`。该提交里的 gtest 端口为 1.18.0。Windows 三元组是 `x64-mingw-static`。预设通过 `VCPKG_ROOT` 找工具链，不写本机绝对路径。
+- `jetson-cross-release` 仍到 G0.4 再加入。`install(EXPORT)` 仍到 G1.6。
 
 G0.1 文件约定（2026-10-27）：
 
 - `LICENSE` 版权行是 `Copyright (c) 2026 FluxAxiom ThermalLab`。
-- `.clang-format` 使用 `BasedOnStyle: LLVM`、`ColumnLimit: 100`、缩进 4、`UseTab: Never`、`Standard: c++17`。这只约束排版。C++ 标准仍是上面的待对齐项，这里也不表示使用 Clang 编译。
+- `.clang-format` 使用 `BasedOnStyle: LLVM`、`ColumnLimit: 100`、缩进 4、`UseTab: Never`、`Standard: c++17`。这只约束排版，不表示使用 Clang 编译。C++ 标准已在 G0.2 定为 17。
 - `.editorconfig`：UTF-8、LF、文件末尾换行、去掉行尾空格。C/C++ 缩进 4，YAML、JSON、Markdown 缩进 2。
 - Git LFS 跟踪 `*.y16`、`*.onnx`、`*.engine`、`*.mp4`、`*.mov`。
 - `.gitignore` 忽略 `build/`、`out/`、`vcpkg_installed/`、`CMakeUserPresets.json`、`compile_commands.json`、`deploy/jetson/sysroot/`。

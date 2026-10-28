@@ -6,9 +6,17 @@
 
 G0：基线与骨架（2026-10-26 至 2026-11-01），版本目标 `v0.0.1`。
 
-仓库里现有设计文档、执行方案和协作规则。还没有 CMake 工程，不能构建，不能测温、采集或推理。
+当前可以构建 `thermallab` 动态库。它只导出 `tl_get_version`，返回 `0.0.1`。还不能测温、采集或推理。
 
-本机环境：Windows，编辑器 Cursor，编译器 MSYS2 mingw64 GCC 15.2.0，生成器 Ninja。预设 `windows-gcc-debug` 与 `windows-gcc-release` 到 G0.2 才加入。
+本机环境：Windows，编辑器 Cursor，编译器 MSYS2 mingw64 GCC 15.2.0，生成器 Ninja。配置前把 MinGW 的 `bin` 加入 `PATH`，并设置 `VCPKG_ROOT`。仓库预设不写本机绝对路径。
+
+```powershell
+cmake --preset windows-gcc-debug
+cmake --build --preset windows-gcc-debug
+ctest --preset windows-gcc-debug -L "unit|golden"
+```
+
+`linux-asan` 只在 Linux 上跑，本机没有那份结果。
 
 ## 诚实边界
 

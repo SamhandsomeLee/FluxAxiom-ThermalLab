@@ -1,0 +1,9 @@
+{
+  "name": "thermallab",
+  "version-string": "0.0.1",
+  "description": "FluxAxiom ThermalLab infrared SDK",
+  "dependencies": [
+    "gtest"
+  ],
+  "builtin-baseline": "15b12b99a227d51e21c86dffd40385439eac87a0"
+}
