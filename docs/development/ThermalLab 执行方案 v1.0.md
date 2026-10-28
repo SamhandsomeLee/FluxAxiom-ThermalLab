@@ -4,7 +4,7 @@
 > 依据：《FluxAxiom ThermalLab 产品需求与系统架构设计 V2.0》（下称“设计文档”）；FluxAxiom《P0 阶段执行方案 v1.1》的协作方式与 2026-10-27 的仓库状态
 > 性质：执行计划，**不是对设计文档 V2.0 的重新冻结**
 > 目标：2027-01-17 达到 M1 投递基线；2027-02-28 达到 M2（JD 全覆盖，v1.0）；2027-03-28 发布 v1.1（Agent 集成）
-> 状态：**G0 进行中；G0.1 已提交，G0.2 最小 SDK 在工作区**
+> 状态：**G0 进行中；G0.2 已提交，G0.3 工作流在工作区，尚未在 GitHub 上跑过**
 
 ## 0. 修订记录
 
@@ -19,6 +19,7 @@
 | Windows 本机与 CI 都用 MSYS2 MinGW GCC，不使用 MSVC；预设改为 `windows-gcc-*`。许可证 MIT。MFC-01 仍待 G4 决定 | §4.2、§4.2.1、§6 |
 | G0.1 文件约定：版权行 `Copyright (c) 2026 FluxAxiom ThermalLab`；clang-format 为 LLVM、列宽 100、缩进 4；LFS 跟踪 y16/onnx/engine/mp4/mov | §4.2.1 |
 | G0.2：C++17；Qt LTS 留到 G0.8；`tl_get_version` 返回静态 `0.0.1`；vcpkg baseline `15b12b99` | §4.2、§4.2.1 |
+| G0.3：CI 四个作业；Windows 锁定 GCC 15.2.0-8 与 clang-format 21.1.1-2；Linux 用 ubuntu-24.04 自带 GCC | §4.2.1 |
 
 <!-- 对齐中做出的落地选择，按「Gx.y 已确定的……」写进对应小节，并在本表加一行。 -->
 
@@ -146,6 +147,15 @@ G0.2 已确定（2026-10-28）：
 - 动态库目标是 `thermallab_core`，别名 `thermallab::core`，输出名 `thermallab`。
 - vcpkg `builtin-baseline` 是 `15b12b99a227d51e21c86dffd40385439eac87a0`。该提交里的 gtest 端口为 1.18.0。Windows 三元组是 `x64-mingw-static`。预设通过 `VCPKG_ROOT` 找工具链，不写本机绝对路径。
 - `jetson-cross-release` 仍到 G0.4 再加入。`install(EXPORT)` 仍到 G1.6。
+
+G0.3 已确定（2026-10-28）：
+
+- 工作流是 `.github/workflows/ci.yml`。作业名是 `windows-gcc-debug`、`linux-debug`、`linux-asan`、`clang-format`。触发是 `main` 的 push 和所有 pull request。测试只跑 `unit|golden`，并带 `--no-tests=error`，标签匹配不到任何测试时作业失败。
+- Windows 作业安装 `mingw-w64-x86_64-gcc` 15.2.0-8 和 `mingw-w64-x86_64-ninja`。编译器版本必须是 15.2.0。镜像不再提供该包时作业失败，不改成浮动最新包。
+- `clang-format` 作业安装 `mingw-w64-x86_64-clang` 21.1.1-2，对 `sdk/` 里的 C/C++ 头和源文件执行 `clang-format --dry-run --Werror -style=file`。
+- Linux 两个作业使用 `ubuntu-24.04` 自带的 GCC 和 CMake 3.28.3，不另装 GCC 15。日志打印 `g++ --version`。
+- vcpkg 只检出 baseline `15b12b99a227d51e21c86dffd40385439eac87a0`。不跑 release 预设，不加 Jetson runner。
+- 本地已配置 `origin`（`SamhandsomeLee/FluxAxiom-ThermalLab`），但这一轮没有确认远程内容，工作流也没有运行记录。分支保护、故意失败的 PR、`main` 全绿都还没有证据。截图目录等证据出现再创建。失败 PR 关掉，截图留下。
 
 G0.1 文件约定（2026-10-27）：
 

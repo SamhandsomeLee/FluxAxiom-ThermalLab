@@ -1,0 +1,160 @@
+# G0.3：Windows MinGW、Linux GCC、Linux ASan、clang-format。
+# 不跑 release 预设，不跑 Jetson。分支保护要等仓库有 GitHub 远程之后再设。
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-gcc-debug:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout vcpkg baseline
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/vcpkg
+          ref: 15b12b99a227d51e21c86dffd40385439eac87a0
+          path: vcpkg
+          fetch-depth: 1
+
+      - name: Install MinGW GCC 15.2.0-8
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          path-type: inherit
+          # 版本必须与本机包一致。镜像里已经没有该版本时，作业失败，不改成浮动最新包。
+          install: mingw-w64-x86_64-gcc=15.2.0-8 mingw-w64-x86_64-ninja
+
+      - name: Bootstrap vcpkg
+        shell: pwsh
+        run: .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+
+      - name: Configure, build, and test
+        shell: pwsh
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+          VCPKG_DISABLE_METRICS: 1
+        run: |
+          $env:Path = "${{ steps.msys2.outputs.msys2-location }}\mingw64\bin;" + $env:Path
+          $gccVersion = & gcc -dumpversion
+          if ($gccVersion -ne "15.2.0") {
+            throw "expected gcc 15.2.0, got $gccVersion"
+          }
+          & gcc --version
+          & cmake --version
+          & ninja --version
+          # pwsh 步骤的退出码只取最后一条原生命令的，所以每条命令后单独检查。
+          cmake --preset windows-gcc-debug
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build --preset windows-gcc-debug
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ctest --preset windows-gcc-debug -L "unit|golden" --no-tests=error --output-on-failure
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+  linux-debug:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout vcpkg baseline
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/vcpkg
+          ref: 15b12b99a227d51e21c86dffd40385439eac87a0
+          path: vcpkg
+          fetch-depth: 1
+
+      - name: Install compilers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ ninja-build cmake pkg-config zip unzip tar
+          g++ --version
+          cmake --version
+
+      - name: Bootstrap vcpkg
+        run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+
+      - name: Configure, build, and test
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+          VCPKG_DISABLE_METRICS: 1
+        run: |
+          cmake --preset linux-debug
+          cmake --build --preset linux-debug
+          ctest --preset linux-debug -L "unit|golden" --no-tests=error --output-on-failure
+
+  linux-asan:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout vcpkg baseline
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/vcpkg
+          ref: 15b12b99a227d51e21c86dffd40385439eac87a0
+          path: vcpkg
+          fetch-depth: 1
+
+      - name: Install compilers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ ninja-build cmake pkg-config zip unzip tar
+          g++ --version
+          cmake --version
+
+      - name: Bootstrap vcpkg
+        run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+
+      - name: Configure, build, and test
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+          VCPKG_DISABLE_METRICS: 1
+        run: |
+          cmake --preset linux-asan
+          cmake --build --preset linux-asan
+          ctest --preset linux-asan -L "unit|golden" --no-tests=error --output-on-failure
+
+  clang-format:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-format 21.1.1-2
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          path-type: inherit
+          install: mingw-w64-x86_64-clang=21.1.1-2
+
+      - name: Check sdk sources
+        shell: pwsh
+        run: |
+          $env:Path = "${{ steps.msys2.outputs.msys2-location }}\mingw64\bin;" + $env:Path
+          $version = & clang-format --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ($version -notmatch "21\.1\.1") {
+            throw "expected clang-format 21.1.1, got $version"
+          }
+          Write-Output $version
+          $files = @(git ls-files -- ":(glob)sdk/**/*.h" ":(glob)sdk/**/*.c" ":(glob)sdk/**/*.cc" ":(glob)sdk/**/*.cpp" ":(glob)sdk/**/*.cxx" ":(glob)sdk/**/*.hpp" ":(glob)sdk/**/*.hh" ":(glob)sdk/**/*.hxx")
+          if ($files.Count -eq 0) {
+            throw "sdk has no C or C++ files"
+          }
+          & clang-format --dry-run --Werror -style=file @files
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
