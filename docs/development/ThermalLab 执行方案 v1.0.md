@@ -4,7 +4,7 @@
 > 依据：《FluxAxiom ThermalLab 产品需求与系统架构设计 V2.0》（下称“设计文档”）；FluxAxiom《P0 阶段执行方案 v1.1》的协作方式与 2026-10-27 的仓库状态
 > 性质：执行计划，**不是对设计文档 V2.0 的重新冻结**
 > 目标：2027-01-17 达到 M1 投递基线；2027-02-28 达到 M2（JD 全覆盖，v1.0）；2027-03-28 发布 v1.1（Agent 集成）
-> 状态：**G0 进行中；G0.2 已提交，G0.3 工作流在工作区，尚未在 GitHub 上跑过**
+> 状态：**G0 进行中；G0.3 首次 CI 失败于包版本，已改用 2026-09-27 安装包内的 GCC 16.2.0-4，尚未重跑**
 
 ## 0. 修订记录
 
@@ -20,6 +20,7 @@
 | G0.1 文件约定：版权行 `Copyright (c) 2026 FluxAxiom ThermalLab`；clang-format 为 LLVM、列宽 100、缩进 4；LFS 跟踪 y16/onnx/engine/mp4/mov | §4.2.1 |
 | G0.2：C++17；Qt LTS 留到 G0.8；`tl_get_version` 返回静态 `0.0.1`；vcpkg baseline `15b12b99` | §4.2、§4.2.1 |
 | G0.3：CI 四个作业；Windows 锁定 GCC 15.2.0-8 与 clang-format 21.1.1-2；Linux 用 ubuntu-24.04 自带 GCC | §4.2.1 |
+| G0.3 修订：Windows CI 改用 2026-09-27 安装包内的 GCC 16.2.0-4 与 Clang 22.1.8-3，不刷新滚动仓库 | §4.2.1 |
 
 <!-- 对齐中做出的落地选择，按「Gx.y 已确定的……」写进对应小节，并在本表加一行。 -->
 
@@ -132,7 +133,7 @@ FluxAxiom-ThermalLab/
 
 - 主开发机是 Windows，编辑器是 Cursor，不安装 Visual Studio。
 - 仓库许可证是 MIT。
-- Windows 本机与 CI 都用 MSYS2 MinGW GCC，不使用 MSVC，不设 `windows-msvc-*` 预设。本机实测编译器为 MSYS2 mingw64 GCC 15.2.0，生成器为 Ninja。预设名是 `windows-gcc-debug`、`windows-gcc-release`。CI 的 Windows 作业安装同一主版本的 mingw-w64 GCC，包版本在 G0.3 锁定。预设不写本机绝对路径。
+- Windows 本机与 CI 都用 MSYS2 MinGW GCC，不使用 MSVC，不设 `windows-msvc-*` 预设。本机实测编译器为 MSYS2 mingw64 GCC 15.2.0，生成器为 Ninja。预设名是 `windows-gcc-debug`、`windows-gcc-release`。CI 的 Windows 编译器改由下面的 G0.3 锁定，不再要求与本机同一主版本。预设不写本机绝对路径。
 - 设计文档 §5.2 仍写「Windows MSVC」。本方案这一轮改用 MinGW GCC。两者的 CRT 不同，不把 MinGW 编出的库当成 MSVC 程序可链接的证明。
 - 设计文档 MFC-01 仍要求「MSVC 独立编译」。MFC 不能用 MinGW 编译。G4.10 开工前再决定：为这一个示例单独使用 MSVC，或把 MFC-01 标为 `Blocked`。G0 不为此安装 MSVC。
 
@@ -151,11 +152,11 @@ G0.2 已确定（2026-10-28）：
 G0.3 已确定（2026-10-28）：
 
 - 工作流是 `.github/workflows/ci.yml`。作业名是 `windows-gcc-debug`、`linux-debug`、`linux-asan`、`clang-format`。触发是 `main` 的 push 和所有 pull request。测试只跑 `unit|golden`，并带 `--no-tests=error`，标签匹配不到任何测试时作业失败。
-- Windows 作业安装 `mingw-w64-x86_64-gcc` 15.2.0-8 和 `mingw-w64-x86_64-ninja`。编译器版本必须是 15.2.0。镜像不再提供该包时作业失败，不改成浮动最新包。
-- `clang-format` 作业安装 `mingw-w64-x86_64-clang` 21.1.1-2，对 `sdk/` 里的 C/C++ 头和源文件执行 `clang-format --dry-run --Werror -style=file`。
+- Windows 作业使用 `msys2/setup-msys2` 提交 `ec48f7c5447b3140e2b088413ae3a55687bccb6e` 自带的 2026-09-27 安装包。`update` 为 false，不执行 `pacman -Sy`。安装 `mingw-w64-x86_64-gcc` 16.2.0-4 和 `mingw-w64-x86_64-ninja` 1.13.2-1。`gcc -dumpversion` 必须是 16.2.0。本机仍是 GCC 15.2.0，两边主版本不同。
+- `clang-format` 作业从同一安装包安装 `mingw-w64-x86_64-clang-tools-extra` 22.1.8-3（依赖 `clang` 22.1.8）。对 `sdk/` 里的 C/C++ 头和源文件执行 `clang-format --dry-run --Werror -style=file`，版本必须是 22.1.8。
 - Linux 两个作业使用 `ubuntu-24.04` 自带的 GCC 和 CMake 3.28.3，不另装 GCC 15。日志打印 `g++ --version`。
 - vcpkg 只检出 baseline `15b12b99a227d51e21c86dffd40385439eac87a0`。不跑 release 预设，不加 Jetson runner。
-- 本地已配置 `origin`（`SamhandsomeLee/FluxAxiom-ThermalLab`），但这一轮没有确认远程内容，工作流也没有运行记录。分支保护、故意失败的 PR、`main` 全绿都还没有证据。截图目录等证据出现再创建。失败 PR 关掉，截图留下。
+- 首次运行是 [ci #1](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/40664554207)。`linux-debug` 与 `linux-asan` 通过。两个 Windows 作业在安装当时锁定的 15.2.0-8 和 21.1.1-2 时失败。改用安装包内版本后尚未重跑。分支保护、故意失败的 PR、`main` 全绿都还没有证据。截图目录等证据出现再创建。失败 PR 关掉，截图留下。
 
 G0.1 文件约定（2026-10-27）：
 

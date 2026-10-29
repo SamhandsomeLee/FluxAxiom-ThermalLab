@@ -25,15 +25,16 @@ jobs:
           path: vcpkg
           fetch-depth: 1
 
-      - name: Install MinGW GCC 15.2.0-8
+      - name: Install MinGW GCC 16.2.0-4
         id: msys2
-        uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e
         with:
           msystem: MINGW64
-          update: true
+          release: true
+          update: false
           path-type: inherit
-          # 版本必须与本机包一致。镜像里已经没有该版本时，作业失败，不改成浮动最新包。
-          install: mingw-w64-x86_64-gcc=15.2.0-8 mingw-w64-x86_64-ninja
+          # 使用该 action 自带的 2026-09-27 安装包数据库，不 pacman -Sy。
+          install: mingw-w64-x86_64-gcc=16.2.0-4 mingw-w64-x86_64-ninja=1.13.2-1
 
       - name: Bootstrap vcpkg
         shell: pwsh
@@ -47,8 +48,8 @@ jobs:
         run: |
           $env:Path = "${{ steps.msys2.outputs.msys2-location }}\mingw64\bin;" + $env:Path
           $gccVersion = & gcc -dumpversion
-          if ($gccVersion -ne "15.2.0") {
-            throw "expected gcc 15.2.0, got $gccVersion"
+          if ($gccVersion -ne "16.2.0") {
+            throw "expected gcc 16.2.0, got $gccVersion"
           }
           & gcc --version
           & cmake --version
@@ -133,14 +134,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install clang-format 21.1.1-2
+      - name: Install clang-format 22.1.8-3
         id: msys2
-        uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e
         with:
           msystem: MINGW64
-          update: true
+          release: true
+          update: false
           path-type: inherit
-          install: mingw-w64-x86_64-clang=21.1.1-2
+          # clang-format 在 clang-tools-extra 里，依赖同一版本的 clang。
+          install: mingw-w64-x86_64-clang-tools-extra=22.1.8-3
 
       - name: Check sdk sources
         shell: pwsh
@@ -148,8 +151,8 @@ jobs:
           $env:Path = "${{ steps.msys2.outputs.msys2-location }}\mingw64\bin;" + $env:Path
           $version = & clang-format --version
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if ($version -notmatch "21\.1\.1") {
-            throw "expected clang-format 21.1.1, got $version"
+          if ($version -notmatch "22\.1\.8") {
+            throw "expected clang-format 22.1.8, got $version"
           }
           Write-Output $version
           $files = @(git ls-files -- ":(glob)sdk/**/*.h" ":(glob)sdk/**/*.c" ":(glob)sdk/**/*.cc" ":(glob)sdk/**/*.cpp" ":(glob)sdk/**/*.cxx" ":(glob)sdk/**/*.hpp" ":(glob)sdk/**/*.hh" ":(glob)sdk/**/*.hxx")
