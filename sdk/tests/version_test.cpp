@@ -7,12 +7,13 @@
 /// **作用**：G0.2 的 unit 测试。确认动态库导出的版本、公共头宏与根 CMakeLists 的
 /// `project(VERSION)` 三者一致。`EXPECTED_VERSION*` 由 `sdk/tests/CMakeLists.txt` 注入。
 /// **边界**：不打开设备，不读文件。不一致时由 GoogleTest 判失败。
+/// 这一分支把期待版本写成 `9.9.9`，测试应当失败，用来证明失败的检查会挡住合并。
 TEST(VersionTest, ReportsStaticG0Version) {
     const char *first = tl_get_version();
     const char *second = tl_get_version();
     ASSERT_NE(first, nullptr);
     EXPECT_EQ(first, second);
-    EXPECT_STREQ(first, EXPECTED_VERSION);
+    EXPECT_STREQ(first, "9.9.9");
     EXPECT_EQ(TL_VERSION_MAJOR, EXPECTED_VERSION_MAJOR);
     EXPECT_EQ(TL_VERSION_MINOR, EXPECTED_VERSION_MINOR);
     EXPECT_EQ(TL_VERSION_PATCH, EXPECTED_VERSION_PATCH);
