@@ -4,7 +4,7 @@
 > 依据：《FluxAxiom ThermalLab 产品需求与系统架构设计 V2.0》（下称“设计文档”）；FluxAxiom《P0 阶段执行方案 v1.1》的协作方式与 2026-10-27 的仓库状态
 > 性质：执行计划，**不是对设计文档 V2.0 的重新冻结**
 > 目标：2027-01-17 达到 M1 投递基线；2027-02-28 达到 M2（JD 全覆盖，v1.0）；2027-03-28 发布 v1.1（Agent 集成）
-> 状态：**G0 进行中；G0.6 硬件清单在工作区。CI 全绿与分支保护仍没有证据**
+> 状态：**G0 进行中。`main` `d73b833` 的四个 CI 作业已通过，分支保护已打开。G0.4 及之后的工作包尚未完成**
 
 ## 0. 修订记录
 
@@ -23,6 +23,7 @@
 | G0.3 修订：Windows CI 改用 2026-09-27 安装包内的 GCC 16.2.0-4 与 Clang 22.1.8-3，不刷新滚动仓库 | §4.2.1 |
 | G0.6：记录 Orin Nano Super 8GB、P2 Pro 未到手、DNESP32S3M、无 UVC；Windows 环境 JSON 入库 | §4.2.1 |
 | 执行时间与工作包顺序冲突时，优先按步骤顺序执行；与设计文档 §9.1 的并行推进冲突时以本方案为准 | §2、§12 |
+| G0.3：`d73b833` 的四个 CI 作业通过；`main` 分支保护与失败 PR #1 的拦截证据入库 | §4.2.1 |
 
 <!-- 对齐中做出的落地选择，按「Gx.y 已确定的……」写进对应小节，并在本表加一行。 -->
 
@@ -159,7 +160,10 @@ G0.3 已确定（2026-10-28）：
 - `clang-format` 作业从同一安装包安装 `mingw-w64-x86_64-clang-tools-extra` 22.1.8-3（依赖 `clang` 22.1.8）。对 `sdk/` 里的 C/C++ 头和源文件执行 `clang-format --dry-run --Werror -style=file`，版本必须是 22.1.8。
 - Linux 两个作业使用 `ubuntu-24.04` 自带的 GCC 和 CMake 3.28.3，不另装 GCC 15。日志打印 `g++ --version`。
 - vcpkg 只检出 baseline `15b12b99a227d51e21c86dffd40385439eac87a0`。不跑 release 预设，不加 Jetson runner。
-- 首次运行是 [ci #1](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/40664554207)。`linux-debug` 与 `linux-asan` 通过。两个 Windows 作业在安装当时锁定的 15.2.0-8 和 21.1.1-2 时失败。改用安装包内版本后尚未重跑。分支保护、故意失败的 PR、`main` 全绿都还没有证据。截图目录等证据出现再创建。失败 PR 关掉，截图留下。
+- 首次运行是 [ci #1](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/40664554207)。`linux-debug` 与 `linux-asan` 通过。两个 Windows 作业在安装当时锁定的 15.2.0-8 和 21.1.1-2 时失败。
+- 改用安装包内版本后，[`a30dc25` 的运行](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/40822226899)结论是 success。当前 `main` `d73b833` 的[运行](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/41394025732)里四个作业都是 success：`linux-debug`、`windows-gcc-debug`、`linux-asan`、`clang-format`。核对的是作业结论，没有打开作业日志。
+- 2026-11-02 给 `main` 打开分支保护。合并必须来自 pull request。必选检查是 `windows-gcc-debug`、`linux-debug`、`linux-asan`、`clang-format`。不要求批准。管理员同样受限制。禁止强推。不要求分支相对基线为最新。
+- 故意失败的 PR 是 [#1](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/pull/1)，提交 `3222dff` 把版本测试的期待改成 `9.9.9`。`windows-gcc-debug`、`linux-debug`、`linux-asan` 失败，`clang-format` 通过。拉取请求没有冲突，`mergeable_state` 为 `blocked`。合并接口返回 405，正文是 `3 of 4 required status checks are failing.` 截图是 `docs/evidence/G0.3/failing-pr-blocked.png`，拍摄时 PR 仍打开。画面是未登录的 Checks 页，能看到这三个失败。合并按钮在该页面没有画出来。截图之后 PR 已关闭且没有合并，分支 `ci/failing-version-test` 已删除。
 
 G0.6 已确定（2026-11-02）：
 
