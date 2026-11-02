@@ -4,7 +4,7 @@
 > 依据：《FluxAxiom ThermalLab 产品需求与系统架构设计 V2.0》（下称“设计文档”）；FluxAxiom《P0 阶段执行方案 v1.1》的协作方式与 2026-10-27 的仓库状态
 > 性质：执行计划，**不是对设计文档 V2.0 的重新冻结**
 > 目标：2027-01-17 达到 M1 投递基线；2027-02-28 达到 M2（JD 全覆盖，v1.0）；2027-03-28 发布 v1.1（Agent 集成）
-> 状态：**G0 进行中；G0.6 硬件清单在工作区。CI 全绿与分支保护仍没有证据**
+> 状态：**G0 补证中。G0.4、G0.5 与 Linux 环境采集为 Blocked。ADR-001、002、014 已采用，ADR-004 为草案，ADR-013 未写**
 
 ## 0. 修订记录
 
@@ -23,6 +23,11 @@
 | G0.3 修订：Windows CI 改用 2026-09-27 安装包内的 GCC 16.2.0-4 与 Clang 22.1.8-3，不刷新滚动仓库 | §4.2.1 |
 | G0.6：记录 Orin Nano Super 8GB、P2 Pro 未到手、DNESP32S3M、无 UVC；Windows 环境 JSON 入库 | §4.2.1 |
 | 执行时间与工作包顺序冲突时，优先按步骤顺序执行；与设计文档 §9.1 的并行推进冲突时以本方案为准 | §2、§12 |
+| G0.3：`d73b833` 的四个 CI 作业通过；`main` 分支保护与失败 PR #1 的拦截证据入库 | §4.2.1 |
+| G0.4、G0.5：暂时拿不到 Jetson，标为 Blocked，不猜测板上版本 | §4.2.1、§12 |
+| G0.7：MySQL Connector/C++、睿创微纳红外开源平台、YOLOX；未引入组件写「未引入」 | §4.2.1 |
+| G0.8：起草 ADR-001、002、004、014；ADR-013 不写、不标已采用 | §4.2.1 |
+| G0 收口：ADR-001、002、014 改为已采用；Linux 环境采集标为 Blocked；写入验收报告 | §4.2.1、§9 |
 
 <!-- 对齐中做出的落地选择，按「Gx.y 已确定的……」写进对应小节，并在本表加一行。 -->
 
@@ -128,7 +133,6 @@ FluxAxiom-ThermalLab/
 **待对齐**：
 
 - G0.4：sysroot 从 Jetson 用 rsync 拉取，还是解包 NVIDIA 发布的 L4T rootfs？Jetson 上的测试是跑交叉编译的二进制，还是在 Jetson 本机构建？
-- G0.7：MySQL 客户端库选 MariaDB Connector/C（LGPL）还是 MySQL Connector/C++（GPLv2 + FOSS Exception）？红外数据集是否允许公开发布衍生模型？检测模型选 YOLOX 还是 RT-DETR？
 
 ### 4.2.1 G0 已确定的选择
 
@@ -140,7 +144,7 @@ FluxAxiom-ThermalLab/
 - 设计文档 §5.2 仍写「Windows MSVC」。本方案这一轮改用 MinGW GCC。两者的 CRT 不同，不把 MinGW 编出的库当成 MSVC 程序可链接的证明。
 - 设计文档 MFC-01 仍要求「MSVC 独立编译」。MFC 不能用 MinGW 编译。G4.10 开工前再决定：为这一个示例单独使用 MSVC，或把 MFC-01 标为 `Blocked`。G0 不为此安装 MSVC。
 
-尚未决定，留在上面的待对齐里：JetPack / L4T / CUDA / TensorRT，以及 G0.4 的 sysroot 来源。Jetson 型号已在 G0.6 记录。
+尚未决定，留在上面的待对齐里：JetPack / L4T / CUDA / TensorRT，以及 G0.4 的 sysroot 来源。Jetson 型号已在 G0.6 记录。G0.4 已冻结，这些选择等板子回到手上再定，不在冻结期间补一个版本或 sysroot 方案。
 
 G0.2 已确定（2026-10-28）：
 
@@ -159,7 +163,10 @@ G0.3 已确定（2026-10-28）：
 - `clang-format` 作业从同一安装包安装 `mingw-w64-x86_64-clang-tools-extra` 22.1.8-3（依赖 `clang` 22.1.8）。对 `sdk/` 里的 C/C++ 头和源文件执行 `clang-format --dry-run --Werror -style=file`，版本必须是 22.1.8。
 - Linux 两个作业使用 `ubuntu-24.04` 自带的 GCC 和 CMake 3.28.3，不另装 GCC 15。日志打印 `g++ --version`。
 - vcpkg 只检出 baseline `15b12b99a227d51e21c86dffd40385439eac87a0`。不跑 release 预设，不加 Jetson runner。
-- 首次运行是 [ci #1](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/40664554207)。`linux-debug` 与 `linux-asan` 通过。两个 Windows 作业在安装当时锁定的 15.2.0-8 和 21.1.1-2 时失败。改用安装包内版本后尚未重跑。分支保护、故意失败的 PR、`main` 全绿都还没有证据。截图目录等证据出现再创建。失败 PR 关掉，截图留下。
+- 首次运行是 [ci #1](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/40664554207)。`linux-debug` 与 `linux-asan` 通过。两个 Windows 作业在安装当时锁定的 15.2.0-8 和 21.1.1-2 时失败。
+- 改用安装包内版本后，[`a30dc25` 的运行](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/40822226899)结论是 success。当前 `main` `d73b833` 的[运行](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/41394025732)里四个作业都是 success：`linux-debug`、`windows-gcc-debug`、`linux-asan`、`clang-format`。核对的是作业结论，没有打开作业日志。
+- 2026-11-02 给 `main` 打开分支保护。合并必须来自 pull request。必选检查是 `windows-gcc-debug`、`linux-debug`、`linux-asan`、`clang-format`。不要求批准。管理员同样受限制。禁止强推。不要求分支相对基线为最新。
+- 故意失败的 PR 是 [#1](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/pull/1)，提交 `3222dff` 把版本测试的期待改成 `9.9.9`。`windows-gcc-debug`、`linux-debug`、`linux-asan` 失败，`clang-format` 通过。拉取请求没有冲突，`mergeable_state` 为 `blocked`。合并接口返回 405，正文是 `3 of 4 required status checks are failing.` 截图是 `docs/evidence/G0.3/failing-pr-blocked.png`，拍摄时 PR 仍打开。画面是未登录的 Checks 页，能看到这三个失败。合并按钮在该页面没有画出来。截图之后 PR 已关闭且没有合并，分支 `ci/failing-version-test` 已删除。
 
 G0.6 已确定（2026-11-02）：
 
@@ -167,9 +174,34 @@ G0.6 已确定（2026-11-02）：
 - P2 Pro 未到手。G1.8 标 `Blocked`。G1 温度路径仍用合成 Y16，不另选未点名的官方数据集。
 - ESP32 型号是 DNESP32S3M。蜂鸣器、LED、光敏元件未确认。
 - 没有可见光 UVC 摄像头。预计到位日期未定，影响 G2.9 与 G5.3。
-- 清单是 `docs/environment/hardware-inventory.md`。Windows 采集脚本是 `scripts/env/collect.ps1`，结果在 `docs/environment/windows.json`。Linux 与 Jetson 用 `scripts/env/collect.sh`，这两份 JSON 还没有。
+- 清单是 `docs/environment/hardware-inventory.md`。Windows 采集脚本是 `scripts/env/collect.ps1`，结果在 `docs/environment/windows.json`。Linux 与 Jetson 用 `scripts/env/collect.sh`。Jetson 的 JSON 已标 `Blocked`。2026-11-02 起 Linux 的 JSON 也标为 `Blocked`，预计到位日期未定。
 - `assets/benchmarks/baseline.yaml` 的 `baseline_id` 是 `g0-2026-11-02`，状态 `Not Verified`，没有性能数字。
-- Qt LTS、MySQL 客户端、检测模型与数据集许可证仍不在这一刀选择。2027 年春节假期尚未公布。
+- Qt LTS 版本仍不在这一刀锁定。MySQL 客户端、检测模型和数据集来源在下面的 G0.7 选定。2027 年春节假期尚未公布。
+- 2026-11-02：Jetson 暂时拿不到。板上的环境 JSON 和 JetPack、L4T、CUDA、TensorRT 采集标为 `Blocked`，预计到位日期未定。已写入的型号和 Windows 清单仍然有效。
+
+G0.4 冻结（2026-11-02）：
+
+- 暂时拿不到 Jetson。G0.4 标为 `Blocked`，预计到位日期未定。
+- 冻结期间不新增交叉编译镜像、sysroot 脚本、CMake 工具链、`jetson-cross-release`、hello、`deploy/jetson/smoke.sh`。不猜测 JetPack、L4T、CUDA、TensorRT、cuDNN。
+- sysroot 来自 rsync 还是 L4T rootfs、板上跑交叉编译二进制还是本机构建，仍留在 §4.2 待对齐。
+- G0.5 的前置是 G0.4，验收要有 Jetson 上的成功运行。G0.5 一并标为 `Blocked`，原因相同。
+- 解冻条件：板子可以上机，并带回 `docs/environment/jetson.json` 和版本命令的原文。解冻前，这两包不挡住后续未标成 `Blocked` 的工作包。
+- ADR-013 要实测版本，随这次冻结不能定稿。G0.8 的 ADR-001、002、004、014 不因这次冻结取消。
+
+G0.7 已确定（2026-11-02）：
+
+- MySQL 客户端选 MySQL Connector/C++，动态链接，尚未引入。适用的例外是 Universal FOSS Exception 1.0，不是 2018 年已声明弃用的旧 MySQL FOSS License Exception。不选 MariaDB Connector/C。
+- 红外数据集按用户所写的「睿纳维创官方提供」核对。公开页面上的主体是睿创微纳红外开源平台。只读了超分数据库的版权声明；平台上其它数据集没有逐个打开。已读声明没有授权公开发布训练得到的模型权重。数据不放入仓库。
+- 检测模型按用户所写的「YOLO」落到 YOLOX（Apache-2.0）。Ultralytics YOLO 的 LICENSE 是 AGPL-3.0，不使用。不下载权重。
+- 尚未引入的组件，许可证表的版本写「未引入」。
+- 白名单脚本是 `scripts/check_license_allowlist.py`，挂在 `linux-debug` 作业里。
+
+G0.8 起草（2026-11-02）：
+
+- 草案曾是 `docs/adr/ADR-001-cpp-rust.md`、`ADR-002-device-owner.md`、`ADR-004-sdk-abi.md`、`ADR-014-licenses.md`。2026-11-02 用户审阅后，ADR-001、002、014 改为「已采用」。ADR-004 仍是「草案」。
+- ADR-004 按 §8.2 只起草，定稿留到 G1.5。本草案不发布错误码数值。
+- ADR-013 不写、不标已采用。没有 JetPack、CUDA、TensorRT 的实测版本。Qt LTS 版本继续不锁定。
+- 验收报告是 `docs/development/G0 验收报告.md`，状态为补证中。`scope.mdc` 仍停在 G0，这一轮不改到 G1。
 
 G0.1 文件约定（2026-10-27）：
 
@@ -434,6 +466,8 @@ G2 起只列到“产出 + 前置 + 关键验收证据”。**每个阶段开始
 ## 12. 当前执行顺序（2026-10-27）
 
 本节的日期安排与未完成的工作包冲突时，以 §2「步骤顺序优先于执行时间」为准。日历进入后一阶段，仍先做前面尚未完成、且未标成 `Blocked` 的步骤。
+
+2026-11-02：G0.4 与 G0.5 为 `Blocked`。板子回到手上之前不做这两包。
 
 **本周（G0）**：
 

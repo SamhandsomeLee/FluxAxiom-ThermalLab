@@ -68,6 +68,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check license allowlist
+        run: python3 scripts/check_license_allowlist.py
+
       - name: Checkout vcpkg baseline
         uses: actions/checkout@v4
         with:
