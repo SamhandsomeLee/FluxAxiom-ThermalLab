@@ -27,9 +27,9 @@ alwaysApply: false
 | 允许 | 条件 |
 | --- | --- |
 | MIT / BSD / Apache-2.0 / Zlib / BSL-1.0 | 直接使用 |
-| LGPL（Qt、FFmpeg LGPL 配置、MariaDB Connector/C） | 只动态链接 |
-| NVIDIA 专有（TensorRT、CUDA） | 不入仓库、不随包分发，依赖 JetPack |
-| GPL / AGPL | 不使用 |
+| LGPL（Qt、FFmpeg LGPL 配置） | 只动态链接 |
+| NVIDIA 专有（TensorRT 二进制、CUDA） | 不入仓库、不随包分发，依赖 JetPack |
+| GPL / AGPL | 不使用。G0.7 选定的 MySQL Connector/C++ 是例外：GPLv2 + Universal FOSS Exception，只动态链接，尚未引入 |
 
 - 新增依赖、模型、数据集，同一轮更新 `docs/third-party-licenses.md`（名称、版本、许可证、链接方式、来源 URL、核对日期）。
 - 参考开源实现时只参考协议与数据布局；复制代码前核对许可证并在文件头注明来源。

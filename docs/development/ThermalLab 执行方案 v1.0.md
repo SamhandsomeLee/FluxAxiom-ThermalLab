@@ -25,6 +25,7 @@
 | 执行时间与工作包顺序冲突时，优先按步骤顺序执行；与设计文档 §9.1 的并行推进冲突时以本方案为准 | §2、§12 |
 | G0.3：`d73b833` 的四个 CI 作业通过；`main` 分支保护与失败 PR #1 的拦截证据入库 | §4.2.1 |
 | G0.4、G0.5：暂时拿不到 Jetson，标为 Blocked，不猜测板上版本 | §4.2.1、§12 |
+| G0.7：MySQL Connector/C++、睿创微纳红外开源平台、YOLOX；未引入组件写「未引入」 | §4.2.1 |
 
 <!-- 对齐中做出的落地选择，按「Gx.y 已确定的……」写进对应小节，并在本表加一行。 -->
 
@@ -130,7 +131,6 @@ FluxAxiom-ThermalLab/
 **待对齐**：
 
 - G0.4：sysroot 从 Jetson 用 rsync 拉取，还是解包 NVIDIA 发布的 L4T rootfs？Jetson 上的测试是跑交叉编译的二进制，还是在 Jetson 本机构建？
-- G0.7：MySQL 客户端库选 MariaDB Connector/C（LGPL）还是 MySQL Connector/C++（GPLv2 + FOSS Exception）？红外数据集是否允许公开发布衍生模型？检测模型选 YOLOX 还是 RT-DETR？
 
 ### 4.2.1 G0 已确定的选择
 
@@ -174,7 +174,7 @@ G0.6 已确定（2026-11-02）：
 - 没有可见光 UVC 摄像头。预计到位日期未定，影响 G2.9 与 G5.3。
 - 清单是 `docs/environment/hardware-inventory.md`。Windows 采集脚本是 `scripts/env/collect.ps1`，结果在 `docs/environment/windows.json`。Linux 与 Jetson 用 `scripts/env/collect.sh`，这两份 JSON 还没有。
 - `assets/benchmarks/baseline.yaml` 的 `baseline_id` 是 `g0-2026-11-02`，状态 `Not Verified`，没有性能数字。
-- Qt LTS、MySQL 客户端、检测模型与数据集许可证仍不在这一刀选择。2027 年春节假期尚未公布。
+- Qt LTS 版本仍不在这一刀锁定。MySQL 客户端、检测模型和数据集来源在下面的 G0.7 选定。2027 年春节假期尚未公布。
 - 2026-11-02：Jetson 暂时拿不到。板上的环境 JSON 和 JetPack、L4T、CUDA、TensorRT 采集标为 `Blocked`，预计到位日期未定。已写入的型号和 Windows 清单仍然有效。
 
 G0.4 冻结（2026-11-02）：
@@ -185,6 +185,14 @@ G0.4 冻结（2026-11-02）：
 - G0.5 的前置是 G0.4，验收要有 Jetson 上的成功运行。G0.5 一并标为 `Blocked`，原因相同。
 - 解冻条件：板子可以上机，并带回 `docs/environment/jetson.json` 和版本命令的原文。解冻前，这两包不挡住后续未标成 `Blocked` 的工作包。
 - ADR-013 要实测版本，随这次冻结不能定稿。G0.8 的 ADR-001、002、004、014 不因这次冻结取消。
+
+G0.7 已确定（2026-11-02）：
+
+- MySQL 客户端选 MySQL Connector/C++，动态链接，尚未引入。适用的例外是 Universal FOSS Exception 1.0，不是 2018 年已声明弃用的旧 MySQL FOSS License Exception。不选 MariaDB Connector/C。
+- 红外数据集按用户所写的「睿纳维创官方提供」核对。公开页面上的主体是睿创微纳红外开源平台。只读了超分数据库的版权声明；平台上其它数据集没有逐个打开。已读声明没有授权公开发布训练得到的模型权重。数据不放入仓库。
+- 检测模型按用户所写的「YOLO」落到 YOLOX（Apache-2.0）。Ultralytics YOLO 的 LICENSE 是 AGPL-3.0，不使用。不下载权重。
+- 尚未引入的组件，许可证表的版本写「未引入」。
+- 白名单脚本是 `scripts/check_license_allowlist.py`，挂在 `linux-debug` 作业里。
 
 G0.1 文件约定（2026-10-27）：
 
