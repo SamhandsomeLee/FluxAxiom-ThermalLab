@@ -4,7 +4,7 @@
 > 依据：《FluxAxiom ThermalLab 产品需求与系统架构设计 V2.0》（下称“设计文档”）；FluxAxiom《P0 阶段执行方案 v1.1》的协作方式与 2026-10-27 的仓库状态
 > 性质：执行计划，**不是对设计文档 V2.0 的重新冻结**
 > 目标：2027-01-17 达到 M1 投递基线；2027-02-28 达到 M2（JD 全覆盖，v1.0）；2027-03-28 发布 v1.1（Agent 集成）
-> 状态：**G0 进行中。`main` `d73b833` 的四个 CI 作业已通过，分支保护已打开。G0.4 及之后的工作包尚未完成**
+> 状态：**G0 进行中。`main` `d73b833` 的四个 CI 作业已通过，分支保护已打开。G0.4 与 G0.5 因暂时拿不到 Jetson 标为 Blocked**
 
 ## 0. 修订记录
 
@@ -24,6 +24,7 @@
 | G0.6：记录 Orin Nano Super 8GB、P2 Pro 未到手、DNESP32S3M、无 UVC；Windows 环境 JSON 入库 | §4.2.1 |
 | 执行时间与工作包顺序冲突时，优先按步骤顺序执行；与设计文档 §9.1 的并行推进冲突时以本方案为准 | §2、§12 |
 | G0.3：`d73b833` 的四个 CI 作业通过；`main` 分支保护与失败 PR #1 的拦截证据入库 | §4.2.1 |
+| G0.4、G0.5：暂时拿不到 Jetson，标为 Blocked，不猜测板上版本 | §4.2.1、§12 |
 
 <!-- 对齐中做出的落地选择，按「Gx.y 已确定的……」写进对应小节，并在本表加一行。 -->
 
@@ -141,7 +142,7 @@ FluxAxiom-ThermalLab/
 - 设计文档 §5.2 仍写「Windows MSVC」。本方案这一轮改用 MinGW GCC。两者的 CRT 不同，不把 MinGW 编出的库当成 MSVC 程序可链接的证明。
 - 设计文档 MFC-01 仍要求「MSVC 独立编译」。MFC 不能用 MinGW 编译。G4.10 开工前再决定：为这一个示例单独使用 MSVC，或把 MFC-01 标为 `Blocked`。G0 不为此安装 MSVC。
 
-尚未决定，留在上面的待对齐里：JetPack / L4T / CUDA / TensorRT，以及 G0.4 的 sysroot 来源。Jetson 型号已在 G0.6 记录。
+尚未决定，留在上面的待对齐里：JetPack / L4T / CUDA / TensorRT，以及 G0.4 的 sysroot 来源。Jetson 型号已在 G0.6 记录。G0.4 已冻结，这些选择等板子回到手上再定，不在冻结期间补一个版本或 sysroot 方案。
 
 G0.2 已确定（2026-10-28）：
 
@@ -174,6 +175,16 @@ G0.6 已确定（2026-11-02）：
 - 清单是 `docs/environment/hardware-inventory.md`。Windows 采集脚本是 `scripts/env/collect.ps1`，结果在 `docs/environment/windows.json`。Linux 与 Jetson 用 `scripts/env/collect.sh`，这两份 JSON 还没有。
 - `assets/benchmarks/baseline.yaml` 的 `baseline_id` 是 `g0-2026-11-02`，状态 `Not Verified`，没有性能数字。
 - Qt LTS、MySQL 客户端、检测模型与数据集许可证仍不在这一刀选择。2027 年春节假期尚未公布。
+- 2026-11-02：Jetson 暂时拿不到。板上的环境 JSON 和 JetPack、L4T、CUDA、TensorRT 采集标为 `Blocked`，预计到位日期未定。已写入的型号和 Windows 清单仍然有效。
+
+G0.4 冻结（2026-11-02）：
+
+- 暂时拿不到 Jetson。G0.4 标为 `Blocked`，预计到位日期未定。
+- 冻结期间不新增交叉编译镜像、sysroot 脚本、CMake 工具链、`jetson-cross-release`、hello、`deploy/jetson/smoke.sh`。不猜测 JetPack、L4T、CUDA、TensorRT、cuDNN。
+- sysroot 来自 rsync 还是 L4T rootfs、板上跑交叉编译二进制还是本机构建，仍留在 §4.2 待对齐。
+- G0.5 的前置是 G0.4，验收要有 Jetson 上的成功运行。G0.5 一并标为 `Blocked`，原因相同。
+- 解冻条件：板子可以上机，并带回 `docs/environment/jetson.json` 和版本命令的原文。解冻前，这两包不挡住后续未标成 `Blocked` 的工作包。
+- ADR-013 要实测版本，随这次冻结不能定稿。G0.8 的 ADR-001、002、004、014 不因这次冻结取消。
 
 G0.1 文件约定（2026-10-27）：
 
@@ -438,6 +449,8 @@ G2 起只列到“产出 + 前置 + 关键验收证据”。**每个阶段开始
 ## 12. 当前执行顺序（2026-10-27）
 
 本节的日期安排与未完成的工作包冲突时，以 §2「步骤顺序优先于执行时间」为准。日历进入后一阶段，仍先做前面尚未完成、且未标成 `Blocked` 的步骤。
+
+2026-11-02：G0.4 与 G0.5 为 `Blocked`。板子回到手上之前不做这两包。
 
 **本周（G0）**：
 

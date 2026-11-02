@@ -20,7 +20,8 @@ platforms:
     cuda: null
     tensorrt: null
     environment_json: null
-    status: missing
+    status: Blocked
+    blocked_reason: 2026-11-02 起暂时拿不到 Jetson，版本未采集
     expected_date: 未定
     affected_work: G0.4、G0.5、G0.8
 samples: []
