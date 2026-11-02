@@ -4,7 +4,7 @@
 > 依据：《FluxAxiom ThermalLab 产品需求与系统架构设计 V2.0》（下称“设计文档”）；FluxAxiom《P0 阶段执行方案 v1.1》的协作方式与 2026-10-27 的仓库状态
 > 性质：执行计划，**不是对设计文档 V2.0 的重新冻结**
 > 目标：2027-01-17 达到 M1 投递基线；2027-02-28 达到 M2（JD 全覆盖，v1.0）；2027-03-28 发布 v1.1（Agent 集成）
-> 状态：**G0 进行中；G0.3 首次 CI 失败于包版本，已改用 2026-09-27 安装包内的 GCC 16.2.0-4，尚未重跑**
+> 状态：**G0 进行中；G0.6 硬件清单在工作区。CI 全绿与分支保护仍没有证据**
 
 ## 0. 修订记录
 
@@ -21,6 +21,7 @@
 | G0.2：C++17；Qt LTS 留到 G0.8；`tl_get_version` 返回静态 `0.0.1`；vcpkg baseline `15b12b99` | §4.2、§4.2.1 |
 | G0.3：CI 四个作业；Windows 锁定 GCC 15.2.0-8 与 clang-format 21.1.1-2；Linux 用 ubuntu-24.04 自带 GCC | §4.2.1 |
 | G0.3 修订：Windows CI 改用 2026-09-27 安装包内的 GCC 16.2.0-4 与 Clang 22.1.8-3，不刷新滚动仓库 | §4.2.1 |
+| G0.6：记录 Orin Nano Super 8GB、P2 Pro 未到手、DNESP32S3M、无 UVC；Windows 环境 JSON 入库 | §4.2.1 |
 
 <!-- 对齐中做出的落地选择，按「Gx.y 已确定的……」写进对应小节，并在本表加一行。 -->
 
@@ -137,7 +138,7 @@ FluxAxiom-ThermalLab/
 - 设计文档 §5.2 仍写「Windows MSVC」。本方案这一轮改用 MinGW GCC。两者的 CRT 不同，不把 MinGW 编出的库当成 MSVC 程序可链接的证明。
 - 设计文档 MFC-01 仍要求「MSVC 独立编译」。MFC 不能用 MinGW 编译。G4.10 开工前再决定：为这一个示例单独使用 MSVC，或把 MFC-01 标为 `Blocked`。G0 不为此安装 MSVC。
 
-尚未决定，留在上面的待对齐里：Jetson 型号与 JetPack 版本、sysroot 来源。
+尚未决定，留在上面的待对齐里：JetPack / L4T / CUDA / TensorRT，以及 G0.4 的 sysroot 来源。Jetson 型号已在 G0.6 记录。
 
 G0.2 已确定（2026-10-28）：
 
@@ -157,6 +158,16 @@ G0.3 已确定（2026-10-28）：
 - Linux 两个作业使用 `ubuntu-24.04` 自带的 GCC 和 CMake 3.28.3，不另装 GCC 15。日志打印 `g++ --version`。
 - vcpkg 只检出 baseline `15b12b99a227d51e21c86dffd40385439eac87a0`。不跑 release 预设，不加 Jetson runner。
 - 首次运行是 [ci #1](https://github.com/SamhandsomeLee/FluxAxiom-ThermalLab/actions/runs/40664554207)。`linux-debug` 与 `linux-asan` 通过。两个 Windows 作业在安装当时锁定的 15.2.0-8 和 21.1.1-2 时失败。改用安装包内版本后尚未重跑。分支保护、故意失败的 PR、`main` 全绿都还没有证据。截图目录等证据出现再创建。失败 PR 关掉，截图留下。
+
+G0.6 已确定（2026-11-02）：
+
+- Jetson 是 NVIDIA Jetson Orin Nano Super Developer Kit，8 GB。内存来自套件名称，未在板上读取。JetPack、L4T、CUDA、TensorRT 未采集。设计文档 §6.2 写 Orin Nano 没有硬件视频编码器，板上尚未确认。
+- P2 Pro 未到手。G1.8 标 `Blocked`。G1 温度路径仍用合成 Y16，不另选未点名的官方数据集。
+- ESP32 型号是 DNESP32S3M。蜂鸣器、LED、光敏元件未确认。
+- 没有可见光 UVC 摄像头。预计到位日期未定，影响 G2.9 与 G5.3。
+- 清单是 `docs/environment/hardware-inventory.md`。Windows 采集脚本是 `scripts/env/collect.ps1`，结果在 `docs/environment/windows.json`。Linux 与 Jetson 用 `scripts/env/collect.sh`，这两份 JSON 还没有。
+- `assets/benchmarks/baseline.yaml` 的 `baseline_id` 是 `g0-2026-11-02`，状态 `Not Verified`，没有性能数字。
+- Qt LTS、MySQL 客户端、检测模型与数据集许可证仍不在这一刀选择。2027 年春节假期尚未公布。
 
 G0.1 文件约定（2026-10-27）：
 

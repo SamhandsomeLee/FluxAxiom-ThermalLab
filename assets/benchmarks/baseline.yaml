@@ -1,0 +1,27 @@
+# G0.6 骨架。没有性能数字。测温、帧率、时延都还没有测量脚本。
+baseline_id: g0-2026-11-02
+status: Not Verified
+platforms:
+  windows:
+    environment_json: docs/environment/windows.json
+    compiler: gcc 15.2.0
+    compiler_source: 本机采集
+  linux:
+    environment_json: null
+    status: missing
+    expected_date: 未定
+    affected_work: G0.6
+  jetson:
+    model: NVIDIA Jetson Orin Nano Super Developer Kit
+    memory_gb: 8
+    memory_source: 用户声明的套件规格，未在板上读取
+    jetpack: null
+    l4t: null
+    cuda: null
+    tensorrt: null
+    environment_json: null
+    status: missing
+    expected_date: 未定
+    affected_work: G0.4、G0.5、G0.8
+samples: []
+measurement_scripts: []

@@ -1,0 +1,25 @@
+{
+    "schema":  "thermallab-env-v1",
+    "platform":  "windows",
+    "collected_at":  "2026-11-02",
+    "os":  {
+               "name":  "Microsoft Windows 11 家庭版 中文版",
+               "version":  "10.0.26200",
+               "arch":  "64 位"
+           },
+    "compiler":  {
+                     "id":  "gcc",
+                     "version":  "15.2.0"
+                 },
+    "cmake":  {
+                  "version":  "4.1.2"
+              },
+    "gpus":  [
+                 "GameViewer Virtual Display Adapter",
+                 "OrayIddDriver Device",
+                 "Intel(R) Arc(TM) 130T GPU (16GB)"
+             ],
+    "nvidia_gpu_present":  false,
+    "openvino":  "Not Verified",
+    "opencl":  "Not Verified"
+}
