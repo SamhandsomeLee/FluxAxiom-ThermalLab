@@ -8,7 +8,8 @@ platforms:
     compiler_source: 本机采集
   linux:
     environment_json: null
-    status: missing
+    status: Blocked
+    blocked_reason: 2026-11-02 起本阶段不采集 Linux 环境，JSON 未生成
     expected_date: 未定
     affected_work: G0.6
   jetson:

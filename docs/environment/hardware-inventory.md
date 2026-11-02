@@ -2,7 +2,7 @@
 
 采集日期：2026-11-02。缺失项的预计到位日期写「未定」表示还没有日期，不是空白。
 
-Windows 环境由 `scripts/env/collect.ps1` 写入 `docs/environment/windows.json`。Linux 与 Jetson 的脚本是 `scripts/env/collect.sh`，这两台机器还没有运行过，所以没有对应 JSON。
+Windows 环境由 `scripts/env/collect.ps1` 写入 `docs/environment/windows.json`。Linux 与 Jetson 的脚本是 `scripts/env/collect.sh`。这两份 JSON 都还没有，并已标为 `Blocked`。
 
 ## 设计文档 §14.1
 
@@ -35,7 +35,7 @@ P2 Pro 未到手不改变 G1 的温度路径。执行方案已确定合成 Y16 �
 
 ## Linux
 
-未采集。预计到位日期未定。在 Linux 机器上运行：
+2026-11-02 起标为 `Blocked`。预计到位日期未定。`docs/environment/linux.json` 没有生成。解冻后在 Linux 机器上运行：
 
 ```sh
 scripts/env/collect.sh docs/environment/linux.json

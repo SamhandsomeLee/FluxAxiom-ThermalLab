@@ -4,7 +4,7 @@
 > 依据：《FluxAxiom ThermalLab 产品需求与系统架构设计 V2.0》（下称“设计文档”）；FluxAxiom《P0 阶段执行方案 v1.1》的协作方式与 2026-10-27 的仓库状态
 > 性质：执行计划，**不是对设计文档 V2.0 的重新冻结**
 > 目标：2027-01-17 达到 M1 投递基线；2027-02-28 达到 M2（JD 全覆盖，v1.0）；2027-03-28 发布 v1.1（Agent 集成）
-> 状态：**G0 进行中。G0.4 与 G0.5 为 Blocked。ADR-001、002、004、014 为草案，ADR-013 未写**
+> 状态：**G0 补证中。G0.4、G0.5 与 Linux 环境采集为 Blocked。ADR-001、002、014 已采用，ADR-004 为草案，ADR-013 未写**
 
 ## 0. 修订记录
 
@@ -27,6 +27,7 @@
 | G0.4、G0.5：暂时拿不到 Jetson，标为 Blocked，不猜测板上版本 | §4.2.1、§12 |
 | G0.7：MySQL Connector/C++、睿创微纳红外开源平台、YOLOX；未引入组件写「未引入」 | §4.2.1 |
 | G0.8：起草 ADR-001、002、004、014；ADR-013 不写、不标已采用 | §4.2.1 |
+| G0 收口：ADR-001、002、014 改为已采用；Linux 环境采集标为 Blocked；写入验收报告 | §4.2.1、§9 |
 
 <!-- 对齐中做出的落地选择，按「Gx.y 已确定的……」写进对应小节，并在本表加一行。 -->
 
@@ -173,7 +174,7 @@ G0.6 已确定（2026-11-02）：
 - P2 Pro 未到手。G1.8 标 `Blocked`。G1 温度路径仍用合成 Y16，不另选未点名的官方数据集。
 - ESP32 型号是 DNESP32S3M。蜂鸣器、LED、光敏元件未确认。
 - 没有可见光 UVC 摄像头。预计到位日期未定，影响 G2.9 与 G5.3。
-- 清单是 `docs/environment/hardware-inventory.md`。Windows 采集脚本是 `scripts/env/collect.ps1`，结果在 `docs/environment/windows.json`。Linux 与 Jetson 用 `scripts/env/collect.sh`，这两份 JSON 还没有。
+- 清单是 `docs/environment/hardware-inventory.md`。Windows 采集脚本是 `scripts/env/collect.ps1`，结果在 `docs/environment/windows.json`。Linux 与 Jetson 用 `scripts/env/collect.sh`。Jetson 的 JSON 已标 `Blocked`。2026-11-02 起 Linux 的 JSON 也标为 `Blocked`，预计到位日期未定。
 - `assets/benchmarks/baseline.yaml` 的 `baseline_id` 是 `g0-2026-11-02`，状态 `Not Verified`，没有性能数字。
 - Qt LTS 版本仍不在这一刀锁定。MySQL 客户端、检测模型和数据集来源在下面的 G0.7 选定。2027 年春节假期尚未公布。
 - 2026-11-02：Jetson 暂时拿不到。板上的环境 JSON 和 JetPack、L4T、CUDA、TensorRT 采集标为 `Blocked`，预计到位日期未定。已写入的型号和 Windows 清单仍然有效。
@@ -197,10 +198,10 @@ G0.7 已确定（2026-11-02）：
 
 G0.8 起草（2026-11-02）：
 
-- 草案是 `docs/adr/ADR-001-cpp-rust.md`、`ADR-002-device-owner.md`、`ADR-004-sdk-abi.md`、`ADR-014-licenses.md`。状态都是「草案」，还不是「已采用」。
+- 草案曾是 `docs/adr/ADR-001-cpp-rust.md`、`ADR-002-device-owner.md`、`ADR-004-sdk-abi.md`、`ADR-014-licenses.md`。2026-11-02 用户审阅后，ADR-001、002、014 改为「已采用」。ADR-004 仍是「草案」。
 - ADR-004 按 §8.2 只起草，定稿留到 G1.5。本草案不发布错误码数值。
 - ADR-013 不写、不标已采用。没有 JetPack、CUDA、TensorRT 的实测版本。Qt LTS 版本继续不锁定。
-- 不写 G0 验收报告，不把阶段改成 G1。
+- 验收报告是 `docs/development/G0 验收报告.md`，状态为补证中。`scope.mdc` 仍停在 G0，这一轮不改到 G1。
 
 G0.1 文件约定（2026-10-27）：
 
